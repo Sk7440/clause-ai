@@ -1,0 +1,23 @@
+The Five-Step Request Flow
+
+Step 1: Request to server. The mobile or web app sends the user's message to your own server, not directly to Claude.
+Step 2: Request to API. Your server calls the Claude API using the SDK or an HTTPS request.
+Step 3: Model processing. Claude runs tokenization, embedding, contextualization and generation.
+Step 4: Response to server. The API sends back the message, the token usage and the stop reason.
+Step 5: Response to client. Your server passes the reply back to the app.
+
+Why the app does not call the API directly: every API request needs your API key. If the app called the API itself, the key would be inside the app where anyone could find it. So the request always goes through your server, which keeps the key secret.
+
+What the request contains: the API key proves who you are and stays on your server. The model field says which Claude model should answer. The messages field holds the conversation. Max tokens is the most tokens Claude may generate in its reply.
+
+Inside the model. Tokenization breaks the input into smaller chunks called tokens. Embedding converts each token into a long list of numbers that represents all the possible meanings of that word. Contextualization refines each embedding based on the surrounding words to find the most likely meaning in context. Generation passes the contextualized embeddings through an output layer that calculates a probability for each possible next word. Claude does not always pick the most likely word; it mixes probability with controlled randomness to create natural, varied responses. After choosing each word, Claude adds it to the sequence and repeats the process for the next word.
+
+When Claude stops generating. max_tokens means it hit the limit you set. end_turn means Claude finished its answer naturally. stop_sequence means Claude produced text you told it to stop at.
+
+Multi-turn conversations. The API has no memory. To hold a conversation, you send the whole chat history with every request. Longer chats cost more tokens.
+
+System prompts set the model's role and rules before the user says anything, so every answer follows the same style.
+
+Temperature controls randomness. Use a low temperature for facts and data extraction, and a higher temperature for creative writing.
+
+Structured output. To get clean JSON, you can prefill the start of the reply with a code fence and set a stop sequence at the closing fence. This worked on Gemini but returned an empty string on Gemma, which ignored the prefill. Newer Claude models do not accept prefill, so schema-based structured output is the reliable way.
