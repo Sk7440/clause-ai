@@ -53,6 +53,7 @@ embedd = init_embeddings(
     model=EMBED_MODEL,
     provider=EMBEDDING_PROVIDER
 )
+#pre store
 if client.collection_exists(COLLECTION_NAME):
     client.delete_collection(COLLECTION_NAME)
     print("Deleted old collection")
