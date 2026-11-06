@@ -3,7 +3,7 @@ from langchain_qdrant import QdrantVectorStore
 from pydantic import BaseModel
 from core.config import get_settings,get_embeddings,get_qdrant_client
 
-
+NO_Answer="I dont know. the handbook dosen't cover that "
 class Source(BaseModel):
     source:str
     page:int|None=None
@@ -13,6 +13,7 @@ class Source(BaseModel):
 class Answer():
     answer:str
     sources:list[Source]
+    score:float
 
 class RAGService():
     def __init__(self)->None:
@@ -33,14 +34,27 @@ class RAGService():
         )
 
     def ask(self,question:str)->None:
-        pass
+        question=question.strip()
+        if not question:
+            raise ValueError("Question must be not Empty")
+            results=self.store,similarty_search_with_score(
+                question,
+                k=self.settings.top_k
+            )
+
+        if not results:
+            return Answer(answer=NO_Answer,sources=[])
+        context="\n\n".join(doc.page_content for doc,_ in results)
+        messages=[{"role":"system","content":self.settings.system_prompt},{"role":"user","content":f"Context:\n{context}\n\nQuestion:{question}"}]
+        return Answer(
+            answer=self.llm.invoke(messages).text,
+            sources=[Source(
+            pages=doc.metadata.get("pages"),
+            score=round(score,4)
+            
+
+            )]
+        )
     def close(self)->None:
         pass
 
-def main():
-    rag_service=RAGService()
-    try:
-        query=input("you:").strip()
-        result= rag_service.ask(query)
-    finally:
-        rag_service.close()
