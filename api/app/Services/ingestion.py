@@ -45,5 +45,4 @@ def ingest(path:str|None=None)->int:
         pass
     return len(chunks)
 
-if__name__=="__main__":
 ingest()

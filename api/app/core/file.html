@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script>
+    let array = [4, 2, "KING", "JACK", 7, "QUEEN", 9, 5];
+    // use filter to get numbers array
+    let numbers = array.filter((ele) => {
+      return typeof ele === "number";
+    });
+
+    numbers.sort();
+    // number sorted
+    console.log(numbers);
+    // use filter to get cards array
+    let cards = array.filter((ele) => {
+      return typeof ele === "string";
+    });
+    cards.sort();
+    // cards sorted
+    console.log(cards);
+    // specify the card in order in object
+    const order = { JACK: 1, QUEEN: 2, KING: 3 };
+    // numerically sorted if result of  a-b is negative a sorted first and then b
+    cards.sort((a, b) => order[a] - order[b]);
+    console.log(cards);
+    // use spread operator to join Arrays
+    sortedArray = [...numbers, ...cards];
+    console.log(sortedArray);
+    // for double each string
+    finalArray = sortedArray.flatMap((ele) => {
+      return typeof ele === "string" ? [ele, ele] : ele;
+    });
+    console.log(finalArray);
+  </script>
+</html>
