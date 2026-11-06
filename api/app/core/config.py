@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     model_config=SettingsConfigDict(env_prefix="RAG_",env_file=".env",extra="ignore")
     data_path:str = "shop_handbook.pdf"
     app_name:str="clause"
-    chat_provider:str = "ollama"
+    chat_provider:str = "ollama"X
     embed_provider:str = "gemma4:31b-cloud"
 
     embed_model:str = "ollama"
