@@ -6,17 +6,18 @@ from langchain_qdrant import QdrantVectorStore
 from pypdf import PdfReader
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client import QdrantClient
-from core.config import get_settings,get_embeddings,get_qdrant_client
+from app.core.config import get_settings, get_embeddings, get_qdrant_client
 
-def load(path:Path)->list[Document]:
-    settings=get_settings()
-    pages = PyPDFLoader(settings.data_path).load_and_split()
+def load(path: Path) -> list[Document]:
+    loader = PyPDFLoader(str(path))
+    documents = loader.load()
+    return documents
 
 def ingest(path:str|None=None)->int:
     settings=get_settings()
     file = Path(path or settings.data_path)
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=settings.chnk_size,
+        chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
         separators=["\n\n", "\n", " ", ""]
     )
