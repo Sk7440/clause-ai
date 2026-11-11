@@ -1,6 +1,5 @@
 
-from app.Services.ingestion import ingest
-from app.Services.chat import RAGService
+from app.services.chat import RAGService
 
 
 def main():
@@ -24,5 +23,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # ingest()
     main()

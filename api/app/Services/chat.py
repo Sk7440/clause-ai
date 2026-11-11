@@ -63,7 +63,8 @@ class RAGService:
         # 2. Search relevant documents
         results = self.store.similarity_search_with_score(
             question,
-            k=self.settings.top_k
+            k=self.settings.top_k,
+            score_threshold=self.settings.threshold_score
         )
 
         # 3. Check results
