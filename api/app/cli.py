@@ -7,6 +7,11 @@ def main():
         query = input("You: ").strip()
         result = rag_service.ask(query)
         print(f"AI: {result.answer}")
+        if result.sources:
+            print("Sources: ")
+            for s in result.sources:
+                page = getattr(s, "pages", getattr(s, "page", getattr(s, "page_number", "N/A")))
+                print(f"-- {s.source}, page: {page}, score: {s.score}")
     except ValueError as e:
         print(f"Error: {e}")
     except (KeyboardInterrupt, EOFError):

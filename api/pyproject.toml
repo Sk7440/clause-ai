@@ -13,6 +13,7 @@ dependencies = [
     "langchain>=1.4.9",
     "langchain-community>=0.4.2",
     "langchain-core>=1.7.6",
+    "langchain-google-genai>=4.4.3",
     "langchain-ollama>=1.1.0",
     "langchain-qdrant>=1.1.0",
     "langchain-text-splitters>=1.1.3",
