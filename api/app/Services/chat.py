@@ -1,124 +1,80 @@
-
 from langchain.chat_models import init_chat_model
-from langchain_qdrant import QdrantVectorStore
+from langchain_qdrant import QdrantVectorStore, RetrievalMode, FastEmbedSparse
 from pydantic import BaseModel
 
-from app.core.config import (
-    get_settings,
-    get_embeddings,
-    get_qdrant_client
-)
+from app.core.config import get_settings, get_qdrant_client, get_embeddings
 
-NO_ANSWER = "I don't know. The handbook doesn't cover that."
 
+NO_ANSWER = "I don't know."
 
 class Source(BaseModel):
     source: str
     page: int | None = None
-
+    score: float
 
 class Answer(BaseModel):
     answer: str
     sources: list[Source]
-    score: float = 0.0
 
-
-class RAGService:
-
+class RAGService():
     def __init__(self) -> None:
-
         self.settings = get_settings()
+
         self.client = get_qdrant_client(self.settings)
+        if not self.client.collection_exists(self.settings.collection_name):
+            raise RuntimeError(f"Collection {self.settings.collection_name} not found!")
 
-        # Check collection existence
-        if not self.client.collection_exists(
-            self.settings.collection_name
-        ):
-            raise RuntimeError(
-                f"Collection {self.settings.collection_name} not found!"
-            )
-
-        # Initialize vector store
         self.store = QdrantVectorStore(
             client=self.client,
             collection_name=self.settings.collection_name,
-            embedding=get_embeddings(self.settings)
+            embedding=get_embeddings( self.settings),
+            sparse_embedding=FastEmbedSparse(model_name="Qdrant/bm25"),
+            retrieval_mode=RetrievalMode.HYBRID,
+            vector_name="dense",
+            sparse_vector_name="sparse"
         )
 
-        # Initialize LLM
+        # LLM
         self.llm = init_chat_model(
             model=self.settings.chat_model,
             model_provider=self.settings.chat_provider,
-            temperature=self.settings.temperature
+            api_key=self.settings.chat_api_key,
+            # temperature=self.settings.chat_temperature,
         )
 
-    def ask(self, question: str) -> Answer:
-
-        # 1. Validate question
+    def ask(self, question: str):
         question = question.strip()
-
         if not question:
-            raise ValueError("Question must not be empty")
+            raise ValueError("Question must be not empty")
 
-        # 2. Search relevant documents
         results = self.store.similarity_search_with_score(
-            question,
+            query=question,
             k=self.settings.top_k,
-            score_threshold=self.settings.threshold_score
+            score_threshold=self.settings.score_threshold
         )
 
-        # 3. Check results
         if not results:
-            return Answer(
-                answer=NO_ANSWER,
-                sources=[]
-            )
+            return Answer(answer=NO_ANSWER, sources=[])
 
-        # 4. Prepare context
-        context = "\n\n".join(
-            doc.page_content
-            for doc, score in results
-        )
+        context = "\n\n".join(doc.page_content for doc, _ in results)
 
-        # 5. Prepare messages
         messages = [
-            {
-                "role": "system",
-                "content": self.settings.system_prompt
-            },
-            {
-                "role": "user",
-                "content": f"""
-Context:
-{context}
-
-Question:
-{question}
-"""
-            }
+            {"role": "system", "content": self.settings.system_prompt},
+            # {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"},
+            {"role": "user", "content": f"Handbook text:\n{context}\n\nCustomer question: {question}"},
         ]
 
-        # 6. Generate response
-        response = self.llm.invoke(messages)
-
-        # 7. Extract sources
-        sources = [
-            Source(
-                source=str(doc.metadata.get("source", "Unknown")),
-                page=doc.metadata.get("page")
-            )
-            for doc, score in results
-        ]
-
-        # 8. Return answer
         return Answer(
-            answer=response.content,
-            sources=sources,
-            score=round(
-                sum(score for doc, score in results) / len(results),
-                4
-            )
+            answer=self.llm.invoke(messages).text,
+            sources=[
+                Source(
+                    source=doc.metadata.get("source", "unknown"),
+                    page=doc.metadata.get("page"),
+                    score=round(score, 4)
+                )
+                for doc, score in results
+            ]
         )
 
-    def close(self) -> None:
-        pass
+    def close(self):
+        self.client.close()
