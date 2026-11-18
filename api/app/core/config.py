@@ -84,6 +84,4 @@ def get_embeddings(settings: Settings) -> Embeddings:
     )
 
 def get_qdrant_client(settings: Settings) -> QdrantClient:
-    if settings.qdrant_url:
-        return QdrantClient(url=settings.qdrant_url)
     return QdrantClient(path=settings.qdrant_path)

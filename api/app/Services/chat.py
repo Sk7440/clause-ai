@@ -1,12 +1,12 @@
 from langchain.chat_models import init_chat_model
 from langchain_qdrant import QdrantVectorStore, RetrievalMode, FastEmbedSparse
 from pydantic import BaseModel
+from qdrant_client import QdrantClient
 
 from app.core.config import get_settings, get_qdrant_client, get_embeddings
 
 
 NO_ANSWER = "I don't know."
-
 
 class Source(BaseModel):
     source: str
@@ -24,6 +24,7 @@ class RAGService:
         self.settings = get_settings()
 
         self.client = get_qdrant_client(self.settings)
+
         if not self.client.collection_exists(self.settings.collection_name):
             raise RuntimeError(f"Collection {self.settings.collection_name} not found!")
 

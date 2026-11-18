@@ -1,22 +1,15 @@
 from app.services.agents import ClauseAgent
 
-
-def main() -> None:
+def main():
     clause_agent = ClauseAgent()
+
     try:
-        while True:
-            query = input("You: ").strip()
-        if not query:
-            return
-        result = clause_agent.ask(query)
+        query = input("You: ").strip()
+        result = clause_agent.ask(question=query)
         print(f"AI: {result}")
 
-
-        
     except (KeyboardInterrupt, EOFError):
-        print()
-    except Exception as e:
-        print(f"Something went wrong: {e}")
+        pass
     finally:
         clause_agent.close()
 
