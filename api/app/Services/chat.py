@@ -42,7 +42,7 @@ class RAGService():
             # temperature=self.settings.chat_temperature,
         )
 
-    def ask(self, question: str):
+    # def ask(self, question: str):
         question = question.strip()
         if not question:
             raise ValueError("Question must be not empty")
