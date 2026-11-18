@@ -1,12 +1,17 @@
-from app.services.agent import ClauseAgent
+from app.services.agents import ClauseAgent
 
 
-def main():
+def main() -> None:
     clause_agent = ClauseAgent()
     try:
-        query = input("You: ").strip()
+        while True:
+            query = input("You: ").strip()
+        if not query:
+            return
         result = clause_agent.ask(query)
         print(f"AI: {result}")
+
+
         
     except (KeyboardInterrupt, EOFError):
         print()
@@ -18,7 +23,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# cd api
-# uv run python -m app.cli
