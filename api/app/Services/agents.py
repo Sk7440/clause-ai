@@ -4,6 +4,8 @@ from langchain.tools import tool
 from app.services.chat import RAGService
 
 
+from app.prompts.loader import get_prompt
+
 class ClauseAgent:
     def __init__(self) -> None:
         self.rag = RAGService()
@@ -38,7 +40,10 @@ class ClauseAgent:
         self.agent = create_agent(
             model=self.rag.llm,
             tools=[search_handbook],
-            system_prompt=self.rag.settings.system_prompt,
+            system_prompt=get_prompt(
+                name="support/system",
+                version=self.rag.settings.system_prompt_version
+                ),
         )
 
     def ask(self, question: str) -> str:
