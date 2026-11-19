@@ -9,14 +9,14 @@
 #NO_ANSWER = "I don't know."
 
 #class Source(BaseModel):
-    source: str
-    page: int | None = None
-    score: float
+    #source: str
+    #page: int | None = None
+    #score: float
 
 
 # class Answer(BaseModel):
-    answer: str
-    sources: list[Source]
+    #answer: str
+    #sources: list[Source]
 
 
 #class RAGService:
@@ -44,38 +44,38 @@
             #api_key=self.settings.chat_api_key,
         #)
 
-    def ask(self, question: str) -> Answer:
-        question = question.strip()
-        if not question:
-            raise ValueError("Question must be not empty")
+    #def ask(self, question: str) -> Answer:
+       # question = question.strip()
+      #  if not question:
+     #       raise ValueError("Question must be not empty")
 
-        results = self.store.similarity_search_with_score(
-            query=question,
-            k=self.settings.top_k,
-            score_threshold=self.settings.score_threshold,
-        )
+      #  results = self.store.similarity_search_with_score(
+      #      query=question,
+       #     k=self.settings.top_k,
+        #    score_threshold=self.settings.score_threshold,
+        #)#
 
-        if not results:
-            return Answer(answer=NO_ANSWER, sources=[])
+        #if not results:
+         #   return Answer(answer=NO_ANSWER, sources=[])
 
-        context = "\n\n".join(doc.page_content for doc, _ in results)
+      #  context = "\n\n".join(doc.page_content for doc, _ in results)
 
-        messages = [
-            {"role": "system", "content": self.settings.system_prompt},
-            {"role": "user", "content": f"Handbook text:\n{context}\n\nCustomer question: {question}"},
-        ]
+       # messages = [
+        #    {"role": "system", "content": self.settings.system_prompt},
+         #   {"role": "user", "content": f"Handbook text:\n{context}\n\nCustomer question: {question}"},
+        #]
 
-        return Answer(
-            answer=self.llm.invoke(messages).text,
-            sources=[
-                Source(
-                    source=doc.metadata.get("source", "unknown"),
-                    page=doc.metadata.get("page"),
-                    score=round(score, 4),
-                )
-                for doc, score in results
-            ],
-        )
+    #    return Answer(
+     #       answer=self.llm.invoke(messages).text,
+      #      sources=[
+       #         Source(
+        #            source=doc.metadata.get("source", "unknown"),
+         #           page=doc.metadata.get("page"),
+          #          score=round(score, 4),
+           #     )
+            #    for doc, score in results
+            #],
+       # )
 
-    def close(self) -> None:
-        self.client.close()
+    #def close(self) -> None:
+     #   self.client.close()
