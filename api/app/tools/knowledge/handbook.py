@@ -1,7 +1,7 @@
 from langchain.tools import tool
 from langchain_qdrant import QdrantVectorStore
 from pydantic import BaseModel
-
+from app.schemas.retrival import Source
 
 class Source(BaseModel):
     source: str
@@ -22,19 +22,27 @@ def file_search(store: QdrantVectorStore, top_k: int):
         if not results:
             return "Nothing found.", []
 
-        texts = []
-        sources = []
-        for doc, score in results:
-            texts.append(doc.page_content)
-            sources.append(
-                Source(
-                    source=doc.metadata.get("source", "unknown"),
-                    page=doc.metadata.get("page"),
-                    score=round(score, 4),
-                )
-            )
+        # texts = []
+        # sources = []
+        # for doc, score in results:
+        #     texts.append(doc.page_content)
+        #     sources.append(
+        #         Source(
+        #             source=doc.metadata.get("source", "unknown"),
+        #             page=doc.metadata.get("page"),
+        #             score=round(score, 4),
+        #         )
+        #     )
 
-        combined_text = "\n\n".join(texts)
+        combined_text = "\n\n".join(doc.page_content for doc, _ in results)
+        sources = [
+            Source(
+                source=doc.metadata.get("source", "unknown"),
+                page=doc.metadata.get("page"),
+                score=round(score, 4),
+            )
+            for doc, score in results
+        ]
         return combined_text, sources
 
     return search_handbook
