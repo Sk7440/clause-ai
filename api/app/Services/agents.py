@@ -1,23 +1,24 @@
 from langchain.agents import create_agent
 from langchain.messages import HumanMessage
 from langchain.tools import tool
-from app.services.chat import RAGService
-
-
+from app.core.config import get_settings
 from app.prompts.loader import get_prompt
+from app.llm.models import get_chat_model
+from app.rag.vector_store import get_vector_store
 
 class ClauseAgent:
     def __init__(self) -> None:
-        self.rag = RAGService()
+        self.rag = get_settings()
+        self.client = get_vector_store(self.settings)
 
         @tool(response_format="content_and_artifact")
         def search_handbook(question: str):
             """Search the Clause shop handbook: refunds, delivery times and fees,
             payments, cash on delivery, warranty, exchanges, tracking, loyalty, support hours.
             Use a short query like "refund window electronics"."""
-            results = self.rag.store.similarity_search_with_score(
+            results = self.client.store.similarity_search_with_score(
                 query=question,
-                k=self.rag.settings.top_k,
+                k=self.client.settings.top_k,
             )
             if not results:
                 return "Nothing found.", []
@@ -38,19 +39,19 @@ class ClauseAgent:
             return combined_text, sources
 
         self.agent = create_agent(
-            model=self.rag.llm,
+            model=get_chat_model(self.rag.settings),
             tools=[search_handbook],
             system_prompt=get_prompt(
                 name="support/system",
-                version=self.rag.settings.system_prompt_version
+                version=self.client.settings.system_prompt_version
                 ),
         )
 
     def ask(self, question: str) -> str:
-        result = self.agent.invoke({"messages": [HumanMessage(question)]})
+        result = self.client.agent.invoke({"messages": [HumanMessage(question)]})
         messages = result["messages"]
         return messages[-1].text
 
     def close(self) -> None:
-        if hasattr(self.rag, "close"):
-            self.rag.close()
+        if hasattr(self.client, "close"):
+            self.store.client.close()
