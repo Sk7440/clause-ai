@@ -45,13 +45,14 @@ class Settings(BaseSettings):
     qdrant_url: str | None = None
 
     # Prompts
+    system_prompt_version: str = "v1"
     # system_prompt: str = (
     #     "You are a helpful Clause assistant. "
     #     "Answer only from the provided context. "
     #     "If the answer is not in the context, say you don't know."
     # )
 
-system_prompt_version:str="v1"
+
 
 @lru_cache
 def get_settings() -> Settings:

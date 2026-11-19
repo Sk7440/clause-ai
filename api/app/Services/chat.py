@@ -38,11 +38,11 @@ class RAGService:
             sparse_vector_name="sparse",
         )
 
-        self.llm = init_chat_model(
-            model=self.settings.chat_model,
-            model_provider=self.settings.chat_provider,
-            api_key=self.settings.chat_api_key,
-        )
+        #self.llm = init_chat_model(
+            #model=self.settings.chat_model,
+            #model_provider=self.settings.chat_provider,
+            #api_key=self.settings.chat_api_key,
+        #)
 
     def ask(self, question: str) -> Answer:
         question = question.strip()
