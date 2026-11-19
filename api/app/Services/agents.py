@@ -1,10 +1,22 @@
 from langchain.agents import create_agent
-from langchain.messages import HumanMessage
+from langchain.messages import HumanMessage, ToolMessage
 from langchain.tools import tool
+from pydantic import BaseModel
 from app.core.config import get_settings
 from app.prompts.loader import get_prompt
 from app.llm.models import get_chat_model
 from app.rag.vector_store import get_vector_store
+
+
+class Source(BaseModel):
+    source: str
+    page: int | None = None
+    score: float
+
+
+class Answer(BaseModel):
+    answer: str
+    sources: list[Source]
 
 
 class ClauseAgent:
@@ -29,11 +41,11 @@ class ClauseAgent:
             for doc, score in results:
                 texts.append(doc.page_content)
                 sources.append(
-                    {
-                        "source": doc.metadata.get("source"),
-                        "page": doc.metadata.get("page"),
-                        "score": round(score, 4),
-                    }
+                    Source(
+                        source=doc.metadata.get("source", "unknown"),
+                        page=doc.metadata.get("page"),
+                        score=round(score, 4),
+                    )
                 )
 
             combined_text = "\n\n".join(texts)
@@ -48,10 +60,16 @@ class ClauseAgent:
             ),
         )
 
-    def ask(self, question: str) -> str:
+    def ask(self, question: str) -> Answer:
         result = self.agent.invoke({"messages": [HumanMessage(question)]})
         messages = result["messages"]
-        return messages[-1].text
+
+        sources: list[Source] = []
+        for msg in messages:
+            if isinstance(msg, ToolMessage) and isinstance(msg.artifact, list):
+                sources.extend(msg.artifact)
+
+        return Answer(answer=messages[-1].text, sources=sources)
 
     def close(self) -> None:
         if hasattr(self.store, "client") and hasattr(self.store.client, "close"):

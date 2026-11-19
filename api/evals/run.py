@@ -7,7 +7,7 @@ from app.services.agents import ClauseAgent
 
 
 EVALS_DIR = Path(__file__).resolve().parent
-GOLDEN_FILE = EVALS_DIR / "golden.jsonl"
+GOLDEN_FILE = EVALS_DIR / "golden_v2.jsonl"
 RESULTS_DIR = EVALS_DIR / "results"
 
 REFUSALS = ["don't know", "do not know", "not mention", "doesn't mention",
