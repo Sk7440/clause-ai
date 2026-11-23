@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # App
     app_name: str = "Clause"
-    data_path: str = "files/shop_handbook.pdf"
+    data_path: str = "data/shop_handbook.pdf"
 
     # Chat model
     chat_provider: str = "ollama"
@@ -39,6 +39,14 @@ class Settings(BaseSettings):
     top_k: int = 3
     score_threshold: float = 0.5
 
+    # Agent limits (per question)
+    max_model_calls: int = 5
+    max_tool_calls: int = 4
+
+    # Memory: summarize old messages when the conversation gets long
+    summary_trigger_tokens: int = 3000
+    summary_keep_messages: int = 10
+
     # Qdrant
     collection_name: str = "shop_handbook"
     qdrant_path: str = "./vector_stores"
@@ -46,12 +54,6 @@ class Settings(BaseSettings):
 
     # Prompts
     system_prompt_version: str = "v1"
-    # system_prompt: str = (
-    #     "You are a helpful Clause assistant. "
-    #     "Answer only from the provided context. "
-    #     "If the answer is not in the context, say you don't know."
-    # )
-
 
 
 @lru_cache
@@ -65,4 +67,6 @@ def get_embeddings(settings: Settings) -> Embeddings:
     )
 
 def get_qdrant_client(settings: Settings) -> QdrantClient:
+    if settings.qdrant_url:
+        return QdrantClient(url=settings.qdrant_url)
     return QdrantClient(path=settings.qdrant_path)
