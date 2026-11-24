@@ -3,6 +3,7 @@ from langchain_qdrant import QdrantVectorStore
 from pydantic import BaseModel
 from app.schemas.retrival import Source
 
+
 class Source(BaseModel):
     source: str
     page: int | None = None

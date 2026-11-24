@@ -4,7 +4,8 @@ from langchain.agents.middleware import (
     ModelFallbackMiddleware,
     ToolCallLimitMiddleware,
     SummarizationMiddleware,
-    ClearToolUsesEdit, ContextEditingMiddleware
+    ClearToolUsesEdit,
+    ContextEditingMiddleware,
 )
 
 from app.core.config import Settings
@@ -17,17 +18,20 @@ def default_stack(settings: Settings) -> list[AgentMiddleware]:
         ModelCallLimitMiddleware(
             run_limit=settings.max_model_calls, exit_behavior="end"
         ),
-        ToolCallLimitMiddleware(
-            run_limit=settings.max_tool_calls
-        ),
+        ToolCallLimitMiddleware(run_limit=settings.max_tool_calls),
         ContextEditingMiddleware(
             edits=[ClearToolUsesEdit(trigger=2000, keep=2)],
         ),
         SummarizationMiddleware(
             model=get_chat_model(settings),
             trigger=("tokens", settings.summary_trigger_tokens),
-            keep=("messages", settings.summary_keep_messages)
-        )
+            keep=("messages", settings.summary_keep_messages),
+            system_prompt="",
+        ),
     ]
 
+
+fallback = get_fallback_middleware(settings)
+if fallback:
+    stack.append(fallback)
     return stack

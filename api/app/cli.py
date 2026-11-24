@@ -1,5 +1,6 @@
 from app.services.agents import ClauseAgent
 
+
 def main():
     clause_agent = ClauseAgent()
 
