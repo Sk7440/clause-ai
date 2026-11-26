@@ -1,36 +1,27 @@
 from contextlib import asynccontextmanager
-from typing import Annotated
 
 from fastapi import FastAPI, Request
-from pydantic import BaseModel, StringConstraints
 
-from app.services.chat import RAGService, Answer
+from app.schemas import AgentReply, AskRequest
+from app.services.agent import ClauseAgent
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.rag = RAGService()
+    app.state.agent = ClauseAgent()
     yield
-    app.state.rag.close()
-
+    app.state.agent.close()
 
 app = FastAPI(title="Clause AI APIs", lifespan=lifespan)
-
-
-class AskQuestion(BaseModel):
-    question: Annotated[
-        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)
-    ]
 
 
 @app.get("/")
 def health():
     return {"status": "ok"}
 
-
-@app.post("/ask", response_model=Answer)
-def ask_query(body: AskQuestion, req: Request):
-    return req.app.state.rag.ask(body.question)
+@app.post("/ask", response_model=AgentReply)
+def ask_query(body: AskRequest, req: Request) -> AgentReply:
+    return req.app.state.agent.ask(body.question,body.thread_id)
 
 
 # cd api

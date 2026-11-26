@@ -17,9 +17,8 @@ from app.middleware.stacks import default_stack
 conn = sqlite3.connect("memory.db", check_same_thread=False)
 checkpointer = SqliteSaver(conn)
 
-
 class ClauseAgent:
-    def __init__(self) -> None:
+    def __init__(self):
         self.settings = get_settings()
         self.store = get_vector_store(settings=self.settings)
 
@@ -29,29 +28,29 @@ class ClauseAgent:
                 file_search(store=self.store, top_k=self.settings.top_k),
             ],
             system_prompt=get_prompt(
-                name="support/system", version=self.settings.system_prompt_version
+                name="support/system",
+                version=self.settings.system_prompt_version
             ),
             middleware=default_stack(self.settings),
-            checkpointer=checkpointer,
+            checkpointer=checkpointer
         )
 
     def ask(self, question: str, thread_id: str | None = None) -> AgentReply:
-        thread_id = thread_id or str(uuid4())  # no id = new conversation
+        thread_id = thread_id or str(uuid4())   # no id = new conversation
 
         result = self.agent.invoke(
             {"messages": [HumanMessage(question)]},
-            config={"configurable": {"thread_id": thread_id}},
+            config={"configurable": {"thread_id": thread_id}}
         )
         messages = result["messages"]
 
         tool_calls: list[ToolCall] = []  # tools the LLM chose to call
-        sources: list[Source] = []  # chunks those tools returned
+        sources: list[Source] = []       # chunks those tools returned
         for message in messages:
             # 1. The LLM asked for a tool -> record name + args
             if isinstance(message, AIMessage):
                 tool_calls.extend(
-                    ToolCall(name=call["name"], args=call["args"])
-                    for call in message.tool_calls
+                    ToolCall(name=call["name"], args=call["args"]) for call in message.tool_calls
                 )
 
             # 2. The tool answered -> collect its sources (the artifact)

@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.schemas.base import Schema
 
 
-class Source(BaseModel):
-    "...."
+class Source(Schema):
+    """One handbook chunk the retriever returned."""
 
-    source: str = Field(default="unknown", description="")
-    page: int | None = Field(default=None, description="")
-    score: float = Field(description="")
+    source: str = Field(default="unknown", description="File the chunk came from")
+    page: int | None = Field(default=None, ge=0, description="Page number in the source file")
+    score: float = Field(description="Retriever relevance score (rounded to 4 dp)")

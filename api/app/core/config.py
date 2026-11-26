@@ -60,13 +60,11 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     return Settings()
 
-
 def get_embeddings(settings: Settings) -> Embeddings:
     return init_embeddings(
         model=settings.embed_model,
         provider=settings.embed_provider,
     )
-
 
 def get_qdrant_client(settings: Settings) -> QdrantClient:
     if settings.qdrant_url:
