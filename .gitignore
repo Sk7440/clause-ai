@@ -21,3 +21,11 @@ api/.env
 
 api/.env
 .env
+
+api/vector_stores/
+api/qdrant_data/
+api/qdrant_local_db/
+api/memory.db
+
+api/memory.db*
+**/__pycache__/

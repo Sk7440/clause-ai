@@ -9,7 +9,7 @@ from app.schemas import AgentReply, Source, ToolCall
 from app.core.config import get_settings
 from app.prompts.loader import get_prompt
 from app.llm.models import get_chat_model
-from app.rag.vectorstore import get_vector_store
+from app.rag.vector_store import get_vector_store
 from app.tools.knowledge.handbook import file_search
 from app.middleware.stacks import default_stack
 

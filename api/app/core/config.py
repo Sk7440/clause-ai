@@ -61,11 +61,16 @@ def get_settings() -> Settings:
     return Settings()
 
 def get_embeddings(settings: Settings) -> Embeddings:
+    kwargs = {}
+    if settings.embed_provider == "google_genai":
+        kwargs["output_dimensionality"] = settings.embed_dim
+
     return init_embeddings(
         model=settings.embed_model,
         provider=settings.embed_provider,
+        api_key=settings.chat_api_key or None,
+        **kwargs,
     )
-
 def get_qdrant_client(settings: Settings) -> QdrantClient:
     if settings.qdrant_url:
         return QdrantClient(url=settings.qdrant_url)

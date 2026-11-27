@@ -1,10 +1,8 @@
 from langchain_qdrant import QdrantVectorStore, RetrievalMode, FastEmbedSparse
-
 from app.core.config import Settings, get_qdrant_client, get_embeddings
 
 
 def get_vector_store(settings: Settings) -> QdrantVectorStore:
-
     client = get_qdrant_client(settings)
     if not client.collection_exists(settings.collection_name):
         raise RuntimeError(f"Collection {settings.collection_name} not found!")
@@ -16,5 +14,5 @@ def get_vector_store(settings: Settings) -> QdrantVectorStore:
         sparse_embedding=FastEmbedSparse(model_name="Qdrant/bm25"),
         retrieval_mode=RetrievalMode.HYBRID,
         vector_name="dense",
-        sparse_vector_name="sparse"
+        sparse_vector_name="sparse",
     )

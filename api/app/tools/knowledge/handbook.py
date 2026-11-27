@@ -1,7 +1,7 @@
+from pydantic import BaseModel
 from langchain.tools import tool
 from langchain_qdrant import QdrantVectorStore
-from pydantic import BaseModel
-from app.schemas.retrival import Source
+from app.schemas.retrieval import Source
 
 
 class Source(BaseModel):
